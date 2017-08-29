@@ -29,7 +29,7 @@ class Server:
 			data = conn.recv(1024)
 			string = bytes.decode(data)
 			request_method = string.split(' ')[0]
-			print("Method:", request_method)
+			print("Method: ", request_method)
 			print("Request body: ", string)
 			if (request_method == 'GET') | (request_method == 'HEAD'):
 				file_requested = string.split(' ')
@@ -37,12 +37,17 @@ class Server:
 				file_requested = file_requested.split('?')[0]
 				if (file_requested == '/'):
 					file_requested = '/index.html'
-				file_requested = 'c:/Sites/Taller/documentRoot'+file_requested
+				file_requested = 'c:/Sites/Taller1/documentRoot'+file_requested
 				try:
 					file_handler = open(file_requested,'rb')
 					if (request_method == 'GET'):
 						response_content = file_handler.read()
+						status_header = self._gen_headers(200)
 						print(response_content)
+						print(status_header)
+					else:
+						status_header = self._gen_headers(404)
+						print(status_header)
 					file_handler.close()
 				except Exception, e:
 					raise
