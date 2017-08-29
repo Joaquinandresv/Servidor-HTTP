@@ -37,8 +37,7 @@ class Server:
 				file_requested = file_requested.split('?')[0]
 				if (file_requested == '/'):
 					file_requested = '/index.html'
-				file_requested = 'localhost:9100' + file_requested
-				print (file_requested)
+				file_requested = 'c:/Sites/Taller/documentRoot'+file_requested
 				try:
 					file_handler = open(file_requested,'rb')
 					if (request_method == 'GET'):
