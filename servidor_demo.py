@@ -1,6 +1,7 @@
 import socket
 import requests
 import json
+import os
 from nose.tools import *
 
 class Server:
@@ -18,9 +19,12 @@ class Server:
 		h = ' '
 		if (code == 200):
 			h = 'HTTP/1.1 200 OK'
+			print("\nHTTP/1.1 200 OK")
 		elif(code == 404):
 			h = 'HTTP/1.1 404 Not Found'
+			print("\nHTTP/1.1 404 Not Found")
 		return h
+
 
 	def _connection(self):
 		while True:
@@ -29,43 +33,39 @@ class Server:
 			data = conn.recv(1024)
 			string = bytes.decode(data)
 			request_method = string.split(' ')[0]
-			print("\n*******************************************************************************")
-			print("Method:", request_method)
-			print("Request body: ", string)
+			print"Method:", request_method
+			print"Request body: ", string
 			if (request_method == 'GET') | (request_method == 'HEAD'):
 				file_requested = string.split(' ')
 				file_requested = file_requested[1]
 				file_requested = file_requested.split('?')[0]
 				if (file_requested == '/'):
 					file_requested = '/index.html'
-				file_requested = "c:/Sites/Taller/documentRoot" + file_requested
-				print("Pagina solicitada [",file_requested,"]")
+				file_requested = "c:/Sites/Taller1/documentRoot" + file_requested
+				#print("Pagina solicitada [",file_requested,"]")
 				try:
 					file_handler = open(file_requested,'rb')
 					if (request_method == 'GET'):
 						response_content = file_handler.read()
 						print(response_content)
-						print("\n")
 					file_handler.close()
-					response_headers = self._headers(200)
-					print("HTTP/1.1 200 OK")
-					print("Aqui va Json Araos")
-					print("*******************************************************************************")
+					response_header = self._headers(200)
+					web_dir = '/index.html'	
+					protocol = string.split(' ')[2]
+					headers = string.split(' ')[3]
+					print ("X-RequestEcho: {Path: ", web_dir,"Method/Protocol: ", string,"}")
 				except Exception, e:
-					print("\nHTTP/1.1 404 Not Found")
-					print("Json Araos")
-					response_headers = self._headers(404)
+					response_header = self._headers(404)
 					if (request_method == 'GET'):
 						response_content = b"<html><body><p>Error 404: File not foud</p></body></html>"
-				server_response = response_headers.encode()
+				server_response = response_header.encode()
 				if(request_method == 'GET'):
 					server_response += response_content
-				
 				conn.send(server_response)
 				conn.close()
 			else:
 				print("Unknown HTTP request method:", request_method)
-			
+				
 			
 
 

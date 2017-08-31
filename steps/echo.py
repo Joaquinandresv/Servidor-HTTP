@@ -9,7 +9,7 @@ def createEchoHeader(method, path, headers):
   echoHeader['headers'] = json.loads(headers)
   echoHeader['protocol'] = "HTTP/1.1"  
   return echoHeader
-
+  
 def compareEchoHeaders(response_headers, expected_headers):
   response_h = response_headers.pop('headers')
   expected_h = expected_headers.pop('headers')  
