@@ -35,19 +35,20 @@ class Server:
 			print"Method:", request_method
 			print"Request body: ", string
 			headers_ = ''
+			dir_path = os.path.dirname(os.path.realpath(__file__))
 			for i in range(3,len(string.split(' '))):
 				headers_ += string.split(' ')[i]
-			if (request_method == 'GET') | (request_method == 'HEAD'):
+			if (request_method == 'GET') | (request_method == 'POST') | (request_method == 'PUT') | (request_method == 'DELETE'):
 				file_requested = string.split(' ')
 				file_requested = file_requested[1]
 				file_requested = file_requested.split('?')[0]
 				if (file_requested == '/'):
 					file_requested = '/index.html'
-				file_requested = "c:/Sites/Taller1/documentRoot" + file_requested
+				file_requested = dir_path + "/documentRoot" + file_requested
 				#print("Pagina solicitada [",file_requested,"]")
 				try:
 					file_handler = open(file_requested,'rb')
-					if (request_method == 'GET'):
+					if (request_method == 'GET') | (request_method == 'POST') | (request_method == 'PUT') | (request_method == 'DELETE'):
 						response_header = self._headers(200)
 						status = response_header
 						method_ = string.split(' ')[0]
@@ -64,10 +65,18 @@ class Server:
 				except Exception, e:
 					response_header = self._headers(404)
 					status = response_header
-					if (request_method == 'GET'):
-						response_content = b"\nStatus:" + status +"\n\n<html><body><p>Error 404: File not foud</p></body></html>"
+					if (request_method == 'GET') | (request_method == 'POST') | (request_method == 'PUT') | (request_method == 'DELETE'):
+						method_ = string.split(' ')[0]
+						path_ = string.split(' ')[1]
+						echoHeader = {
+						"method" : method_,
+						"path" : path_,
+						"protocol" : "HTTP/1.1",
+						"headers" : "{" + json.dumps(headers_) + "}"
+						}
+						response_content = b"\nStatus:" + status +"\nX-RequestEcho:" + json.dumps(echoHeader) + "\n\n<html><body><p>Error 404: File not foud</p></body></html>"
 				server_response = response_header.encode()
-				if(request_method == 'GET'):
+				if(request_method == 'GET') | (request_method == 'POST') | (request_method == 'PUT') | (request_method == 'DELETE'):
 					server_response += response_content
 				print(server_response)
 				conn.send(server_response)
