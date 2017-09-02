@@ -19,12 +19,11 @@ class Server:
 		h = ' '
 		if (code == 200):
 			h = 'HTTP/1.1 200 OK'
-			print("\nHTTP/1.1 200 OK")
+			#print("\nHTTP/1.1 200 OK")
 		elif(code == 404):
 			h = 'HTTP/1.1 404 Not Found'
-			print("\nHTTP/1.1 404 Not Found")
+			#print("\nHTTP/1.1 404 Not Found")
 		return h
-
 
 	def _connection(self):
 		while True:
@@ -35,6 +34,9 @@ class Server:
 			request_method = string.split(' ')[0]
 			print"Method:", request_method
 			print"Request body: ", string
+			headers_ = ''
+			for i in range(3,len(string.split(' '))):
+				headers_ += string.split(' ')[i]
 			if (request_method == 'GET') | (request_method == 'HEAD'):
 				file_requested = string.split(' ')
 				file_requested = file_requested[1]
@@ -46,21 +48,28 @@ class Server:
 				try:
 					file_handler = open(file_requested,'rb')
 					if (request_method == 'GET'):
-						response_content = file_handler.read()
-						print(response_content)
+						response_header = self._headers(200)
+						status = response_header
+						method_ = string.split(' ')[0]
+						path_ = string.split(' ')[1]
+						echoHeader = {
+						"method" : method_,
+						"path" : path_,
+						"protocol" : "HTTP/1.1",
+						"headers" : "{" + json.dumps(headers_) + "}"
+						}
+						response_content = b"\nStatus:" + status + "\nX-RequestEcho:" + json.dumps(echoHeader) +"\n\n" 
+						response_content += file_handler.read()
 					file_handler.close()
-					response_header = self._headers(200)
-					web_dir = '/index.html'	
-					protocol = string.split(' ')[2]
-					headers = string.split(' ')[3]
-					print ("X-RequestEcho: {Path: ", web_dir,"Method/Protocol: ", string,"}")
 				except Exception, e:
 					response_header = self._headers(404)
+					status = response_header
 					if (request_method == 'GET'):
-						response_content = b"<html><body><p>Error 404: File not foud</p></body></html>"
+						response_content = b"\nStatus:" + status +"\n\n<html><body><p>Error 404: File not foud</p></body></html>"
 				server_response = response_header.encode()
 				if(request_method == 'GET'):
 					server_response += response_content
+				print(server_response)
 				conn.send(server_response)
 				conn.close()
 			else:
